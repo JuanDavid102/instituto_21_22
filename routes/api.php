@@ -17,9 +17,11 @@ use App\Http\Controllers\API\MateriaController;
 use App\Http\Controllers\API\MatriculaController;
 use App\Http\Controllers\API\PeriodoLectivoController;
 use App\Http\Controllers\API\MateriaMatriculadaController;
-
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 use Psr\Http\Message\ServerRequestInterface;
 use Tqdev\PhpCrudApi\Api;
 use Tqdev\PhpCrudApi\Config;
@@ -34,6 +36,30 @@ use Tqdev\PhpCrudApi\Config;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Route::post('/tokens/create', function (Request $request) {
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required'
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (! $user || ! Hash::check($request->password, $user->password)) {
+        throw ValidationException::withMessages([
+            'email' => ['The provided credentials are incorrect.'],
+        ]);
+    }
+
+    return response()->json([
+        'token_type' => 'Bearer',
+        'access_token' => $user->createToken('token_name')->plainTextToken // token name you can choose for your self or leave blank if you like to
+    ]);
+});
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
 
 Route::apiResource('centros', CentroController::class);
 
@@ -79,7 +105,3 @@ Route::any('/{any}', function (ServerRequestInterface $request) {
     $response = $api->handle($request);
     return $response;
 })->where('any', '.*');
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
