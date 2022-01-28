@@ -2,14 +2,21 @@
 
 use App\Http\Controllers\API\CentroController;
 use App\Http\Controllers\API\NivelController;
+
+
+
 use App\Http\Controllers\API\falta_profesorController;
+
+
+
 use App\Http\Controllers\API\GrupoController;
 use App\Http\Controllers\API\TutorizadoController;
+
 use App\Http\Controllers\API\MateriaController;
+
 use App\Http\Controllers\API\MatriculaController;
 use App\Http\Controllers\API\PeriodoLectivoController;
 use App\Http\Controllers\API\MateriaMatriculadaController;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Psr\Http\Message\ServerRequestInterface;
@@ -48,13 +55,11 @@ Route::post('tokens/create', function (Request $request) {
         'token_type' => 'Bearer',
         'access_token' => $user->createToken('token_name')->plainTextToken // token name you can choose for your self or leave blank if you like to
     ]);
-});
+})->name('login');
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-Route::apiResource('centros', CentroController::class);
+Route::middleware('auth:sanctum')->
+    apiResource('centros', CentroController::class)
+;
 
 Route::apiResource('matriculas', MatriculaController::class);
 
