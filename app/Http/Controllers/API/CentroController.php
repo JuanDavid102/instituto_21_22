@@ -11,6 +11,31 @@ use Illuminate\Support\Facades\Http;
 
 class CentroController extends Controller
 {
+
+    /**
+     * Create the controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->authorizeResource(Centro::class, 'centro');
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexOD()
+    {
+        $this->authorize('viewAny', Centro::class);
+        //$this->authorize('viewOD', Centro::class);
+        // return CentroResource::collection(Centro::paginate(10));
+        $response = Http::get('https://datosabiertos.regiondemurcia.es/catalogo/api/action//datastore_search?resource_id=52dd8435-46aa-495e-bd2b-703263e576e7&limit=5');
+        return response()->json(json_decode($response));
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -18,9 +43,9 @@ class CentroController extends Controller
      */
     public function index()
     {
-        // return CentroResource::collection(Centro::paginate(10));
-        $response = Http::get('https://datosabiertos.regiondemurcia.es/catalogo/api/action//datastore_search?resource_id=52dd8435-46aa-495e-bd2b-703263e576e7&limit=5');
-        return response()->json(json_decode($response));
+        return CentroResource::collection(Centro::paginate(10));
+        // $response = Http::get('https://datosabiertos.regiondemurcia.es/catalogo/api/action//datastore_search?resource_id=52dd8435-46aa-495e-bd2b-703263e576e7&limit=5');
+        // return response()->json(json_decode($response));
     }
 
     /**
@@ -31,6 +56,12 @@ class CentroController extends Controller
      */
     public function store(Request $request)
     {
+        // $this->authorize('create', Centro::class);
+
+        /*if ($request->user()->cannot('create', Centro::class)) {
+            abort(403, "No eres administrador, intentalo mejor anda");
+        }*/
+
         $centro = json_decode($request->getContent(), true);
 
         $centro = Centro::create($centro);
@@ -61,9 +92,15 @@ class CentroController extends Controller
      */
     public function update(Request $request, Centro $centro)
     {
-        if (! Gate::allows('update-centro', $centro)) {
+        /*if (! Gate::allows('update-centro', $centro)) {
             abort(403);
-        }
+        }*/
+
+        /*if ($request->user()->cannot('update', $centro)) {
+            abort(403, "No eres coordinador, intentalo mejor la proxima vez");
+        }*/
+
+        // $this->authorize('update', $centro); // Llama al método update del CentroPolicy y comprueba si autoriza o no
 
         $centroData = json_decode($request->getContent(), true);
         $centro->update($centroData);
@@ -79,6 +116,13 @@ class CentroController extends Controller
      */
     public function destroy(Centro $centro)
     {
+
+        /*if ($request->user()->cannot('delete', $centro)) {// user() no es otra cosa que la instancia de $user usado en las políticas
+            abort(403, "No eres administrador, no tiene el derecho a borrar este CENTRO");
+        }*/
+
+        // $this->authorize('delete', $centro);
+
         $centro->delete();
     }
 }
