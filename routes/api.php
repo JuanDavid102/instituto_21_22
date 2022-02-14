@@ -64,6 +64,7 @@ Route::middleware('auth:sanctum')->
     apiResource('centros', CentroController::class)
 ;
 
+
 Route::apiResource('matriculas', MatriculaController::class);
 
 Route::apiResource('niveles', NivelController::class)
@@ -77,8 +78,8 @@ Route::apiResource('faltas_profesores', falta_profesorController::class)
 ->parameters([
     'faltas_profesores' => 'falta_profesor'
 ]);
-
-Route::apiResource('grupos', GrupoController::class);
+Route::middleware('auth:sanctum')->
+    apiResource('grupos', GrupoController::class);
 
 Route::apiResource('tutorizados', TutorizadoController::class);
 
