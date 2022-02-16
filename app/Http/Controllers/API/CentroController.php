@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Centro;
 use Illuminate\Http\Request;
 use App\Http\Resources\CentroResource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Gate;
+use App\Models\User;
 
 class CentroController extends Controller
 {
@@ -36,6 +38,13 @@ class CentroController extends Controller
         $this->authorize('viewAny', Centro::class);
         $response = Http::get('https://datosabiertos.regiondemurcia.es/catalogo/api/action//datastore_search?resource_id=52dd8435-46aa-495e-bd2b-703263e576e7&limit=5');
         return response()->json(json_decode($response));
+    }
+
+    public function miCentro()
+    {
+        // Recupero el usuario autenticado, también se puede hacer desde el request
+        $user = Auth::user();
+        return new CentroResource($user->centroCoordinado);
     }
 
     /**

@@ -83,7 +83,7 @@ Route::middleware('auth:sanctum')->
 
 Route::apiResource('tutorizados', TutorizadoController::class);
 
-
+Route::get('miCentro', [CentroController::class, 'miCentro'])->middleware('auth:sanctum');
 
 Route::apiResource('materias', MateriaController::class);
 

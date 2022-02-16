@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Models\Grupo;
+use App\Models\Centro;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use App\Models\User;
 use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
 
-class GruposUsuarioTest extends TestCase
+class CentroCoordinado extends TestCase
 {
     /**
      * A basic feature test example.
@@ -18,16 +18,12 @@ class GruposUsuarioTest extends TestCase
      */
     public function test_example()
     {
-
         Sanctum::actingAs(
-            User::factory()->hasAttached(
-                Grupo::factory()->count(3)
-            )->create()
+            User::factory()->has(Centro::factory(), 'centroCoordinado')->create()
         );
-        $response = $this->get('/api/grupos');
+        $response = $this->get('/api/miCentro');
 
         $response->assertStatus(200)
-        ->assertJsonStructure(['data' => [['curso', 'letra', 'nivel']]])->assertJsonCount(3, 'data');;
-
+        ->assertJsonStructure(['data' => ['codigo', 'nombre', 'web']])->assertJsonCount(1);
     }
 }

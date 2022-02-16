@@ -54,7 +54,11 @@ class User extends Authenticatable
             return false;
         }
     }
-
+    /**
+     * Funcion que define un join entre el usuario y la clase centro, en una relacion uno
+     * a uno
+     * @return - devuelve un objeto de tipo Centro con los datos del centro que coordina
+     */
     public function centroCoordinado() {
         return $this->hasOne(Centro::class, 'coordinador');
     }
