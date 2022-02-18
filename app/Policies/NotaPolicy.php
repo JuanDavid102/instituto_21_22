@@ -2,27 +2,21 @@
 
 namespace App\Policies;
 
-use App\Models\Centro;
+use App\Models\Nota;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class CentroPolicy
+class NotaPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Perform pre-authorization checks.
-     *
-     * @param  \App\Models\User  $user
-     * @param  string  $ability
-     * @return void|bool
-     */
     public function before(User $user, $ability)
     {
-        if ($user->isAdministrator()) {
+        if ($user->esProfesor()) {
             return true;
         }
     }
+
     /**
      * Determine whether the user can view any models.
      *
@@ -31,17 +25,17 @@ class CentroPolicy
      */
     public function viewAny(User $user)
     {
-        return $user->id == 1; // un ejemplo de autorización a un usuario concreto.
+        return true;
     }
 
     /**
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Centro  $centro
+     * @param  \App\Models\Nota  $nota
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Centro $centro)
+    public function view(User $user, Nota $nota)
     {
         return true;
     }
@@ -54,65 +48,54 @@ class CentroPolicy
      */
     public function create(User $user)
     {
-        return true; //$user->id == 1; // 'administrador';
+        return false;
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Centro  $centro
+     * @param  \App\Models\Nota  $nota
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, Centro $centro)
+    public function update(User $user, Nota $nota)
     {
-        if (($centroCoordinado = $user->centroCoordinado) &&
-        $centro->id == $centroCoordinado->id) {
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Centro  $centro
+     * @param  \App\Models\Nota  $nota
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Centro $centro)
+    public function delete(User $user, Nota $nota)
     {
-
-        if (($centroCoordinado = $user->centroCoordinado) &&
-        $centro->id == $centroCoordinado->id) {
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 
     /**
      * Determine whether the user can restore the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Centro  $centro
+     * @param  \App\Models\Nota  $nota
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, Centro $centro)
+    public function restore(User $user, Nota $nota)
     {
-        //
+        return false;
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Centro  $centro
+     * @param  \App\Models\Nota  $nota
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete(User $user, Centro $centro)
+    public function forceDelete(User $user, Nota $nota)
     {
-        //
+        return false;
     }
 }

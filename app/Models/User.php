@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -61,5 +62,26 @@ class User extends Authenticatable
 
     public function grupos() {
         return $this->belongsToMany(Grupo::class, 'matriculas', 'alumno', 'grupo');
+    }
+
+    public function notas()
+    {
+        return $this->hasMany(Nota::class);
+    }
+
+    public function esProfesor()
+    {
+        //$usuarioProfesor = DB::table('materia_impartida')->where('docente', $this->id);
+
+        $usuarioProfesor = $this->materias();
+        if ($usuarioProfesor != null) {
+            return true;
+        }
+        return false;
+    }
+
+    public function materias()
+    {
+        return $this->hasMany(MateriaImpartida::class, 'docente');
     }
 }
