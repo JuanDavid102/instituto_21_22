@@ -1,0 +1,657 @@
+diff --git a/app/Http/Controllers/API/MateriaImpartidaController.php b/app/Http/Controllers/API/MateriaImpartidaController.php
+deleted file mode 100644
+index 83c0ae2..0000000
+--- a/app/Http/Controllers/API/MateriaImpartidaController.php
++++ /dev/null
+@@ -1,65 +0,0 @@
+-<?php
+-
+-namespace App\Http\Controllers\API;
+-
+-use App\Http\Controllers\Controller;
+-use App\Models\MateriaImpartida;
+-use Illuminate\Http\Request;
+-
+-class MateriaImpartidaController extends Controller
+-{
+-    /**
+-     * Display a listing of the resource.
+-     *
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function index()
+-    {
+-        //
+-    }
+-
+-    /**
+-     * Store a newly created resource in storage.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function store(Request $request)
+-    {
+-        //
+-    }
+-
+-    /**
+-     * Display the specified resource.
+-     *
+-     * @param  \App\Models\MateriaImpartida  $materiaImpartida
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function show(MateriaImpartida $materiaImpartida)
+-    {
+-        //
+-    }
+-
+-    /**
+-     * Update the specified resource in storage.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @param  \App\Models\MateriaImpartida  $materiaImpartida
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function update(Request $request, MateriaImpartida $materiaImpartida)
+-    {
+-        //
+-    }
+-
+-    /**
+-     * Remove the specified resource from storage.
+-     *
+-     * @param  \App\Models\MateriaImpartida  $materiaImpartida
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function destroy(MateriaImpartida $materiaImpartida)
+-    {
+-        //
+-    }
+-}
+diff --git a/app/Http/Controllers/API/NotaController.php b/app/Http/Controllers/API/NotaController.php
+deleted file mode 100644
+index de5eba9..0000000
+--- a/app/Http/Controllers/API/NotaController.php
++++ /dev/null
+@@ -1,103 +0,0 @@
+-<?php
+-
+-namespace App\Http\Controllers\API;
+-
+-use App\Http\Controllers\Controller;
+-use App\Http\Resources\NotaResource;
+-use App\Models\Nota;
+-use Illuminate\Http\Request;
+-use Illuminate\Support\Facades\Auth;
+-use Illuminate\Support\Facades\DB;
+-
+-class NotaController extends Controller
+-{
+-    public function __construct()
+-    {
+-        $this->authorizeResource(Nota::class, 'nota');
+-    }
+-
+-    /**
+-     * Display a listing of the resource.
+-     *
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function index()
+-    {
+-        $notas = Nota::paginate(20);
+-        return NotaResource::collection($notas);
+-    }
+-
+-    public function media($materia_id)
+-    {
+-        $totalNotas = 0;
+-        $contadorNotas = 0;
+-        $usuarioAutenticado = Auth::user();
+-        $notas = $usuarioAutenticado->notas;
+-        foreach ($notas as $nota) {
+-            $materia = $nota->materia;
+-            if ($materia->id == $materia_id) {
+-                $totalNotas = $totalNotas + $nota->nota;
+-                $contadorNotas++;
+-            }
+-        }
+-        if ($contadorNotas != 0) {
+-            $resultado = "La nota media es: " . $totalNotas/$contadorNotas;
+-        }else{
+-            $resultado = "Nota media de usuario no encontrada";
+-        }
+-
+-        return ($resultado);
+-    }
+-
+-    /**
+-     * Store a newly created resource in storage.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function store(Request $request)
+-    {
+-        $nota = json_decode($request->getContent(), true);
+-
+-        $nota = Nota::create($nota);
+-
+-        return new NotaResource($nota);
+-    }
+-
+-    /**
+-     * Display the specified resource.
+-     *
+-     * @param  \App\Models\Nota  $nota
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function show(Nota $nota)
+-    {
+-        return new NotaResource($nota);
+-    }
+-
+-    /**
+-     * Update the specified resource in storage.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @param  \App\Models\Nota  $nota
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function update(Request $request, Nota $nota)
+-    {
+-        $notaData = json_decode($request->getContent(), true);
+-        $nota->update($notaData);
+-
+-        return new NotaResource($nota);
+-    }
+-
+-    /**
+-     * Remove the specified resource from storage.
+-     *
+-     * @param  \App\Models\Nota  $nota
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function destroy(Nota $nota)
+-    {
+-        $nota->delete();
+-    }
+-}
+diff --git a/app/Http/Resources/NotaResource.php b/app/Http/Resources/NotaResource.php
+deleted file mode 100644
+index 5000886..0000000
+--- a/app/Http/Resources/NotaResource.php
++++ /dev/null
+@@ -1,25 +0,0 @@
+-<?php
+-
+-namespace App\Http\Resources;
+-
+-use Illuminate\Http\Resources\Json\JsonResource;
+-
+-class NotaResource extends JsonResource
+-{
+-    /**
+-     * Transform the resource into an array.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+-     */
+-    public function toArray($request)
+-    {
+-        //return parent::toArray($request);
+-        return [
+-            "user_id" => new UserResource($this->user),
+-            "materia_id" => new UserResource($this->materia),
+-            "evaluacion" => $this->evaluacion,
+-            "nota" => $this->nota
+-        ];
+-    }
+-}
+diff --git a/app/Models/Materia.php b/app/Models/Materia.php
+index ad8f91c..137829f 100644
+--- a/app/Models/Materia.php
++++ b/app/Models/Materia.php
+@@ -12,9 +12,4 @@ class Materia extends Model
+     protected $fillable = [
+         'nombre'
+     ];
+-
+-    public function notas()
+-    {
+-        return $this->hasMany(Nota::class);
+-    }
+ }
+diff --git a/app/Models/MateriaImpartida.php b/app/Models/MateriaImpartida.php
+deleted file mode 100644
+index 8c05468..0000000
+--- a/app/Models/MateriaImpartida.php
++++ /dev/null
+@@ -1,22 +0,0 @@
+-<?php
+-
+-namespace App\Models;
+-
+-use Illuminate\Database\Eloquent\Factories\HasFactory;
+-use Illuminate\Database\Eloquent\Model;
+-
+-class MateriaImpartida extends Model
+-{
+-    use HasFactory;
+-
+-    protected $fillable=[
+-        "docente",
+-        "grupo",
+-        "materia"
+-    ];
+-
+-    public function profesor()
+-    {
+-        return $this->belongsTo(User::class, "docente");
+-    }
+-}
+diff --git a/app/Models/Nota.php b/app/Models/Nota.php
+deleted file mode 100644
+index 906f7e0..0000000
+--- a/app/Models/Nota.php
++++ /dev/null
+@@ -1,28 +0,0 @@
+-<?php
+-
+-namespace App\Models;
+-
+-use Illuminate\Database\Eloquent\Factories\HasFactory;
+-use Illuminate\Database\Eloquent\Model;
+-
+-class Nota extends Model
+-{
+-    use HasFactory;
+-
+-    protected $fillable=[
+-        "user_id",
+-        "materia_id",
+-        "evaluacion",
+-        "nota"
+-    ];
+-
+-    public function user()
+-    {
+-        return $this->belongsTo(User::class);
+-    }
+-
+-    public function materia()
+-    {
+-        return $this->belongsTo(Materia::class);
+-    }
+-}
+diff --git a/app/Models/User.php b/app/Models/User.php
+index a82c365..28bd201 100644
+--- a/app/Models/User.php
++++ b/app/Models/User.php
+@@ -6,7 +6,6 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
+ use Illuminate\Database\Eloquent\Factories\HasFactory;
+ use Illuminate\Foundation\Auth\User as Authenticatable;
+ use Illuminate\Notifications\Notifiable;
+-use Illuminate\Support\Facades\DB;
+ use Laravel\Sanctum\HasApiTokens;
+ 
+ class User extends Authenticatable
+@@ -63,25 +62,4 @@ class User extends Authenticatable
+     public function grupos() {
+         return $this->belongsToMany(Grupo::class, 'matriculas', 'alumno', 'grupo');
+     }
+-
+-    public function notas()
+-    {
+-        return $this->hasMany(Nota::class);
+-    }
+-
+-    public function esProfesor()
+-    {
+-        //$usuarioProfesor = DB::table('materia_impartida')->where('docente', $this->id);
+-
+-        $usuarioProfesor = $this->materias();
+-        if ($usuarioProfesor != null) {
+-            return true;
+-        }
+-        return false;
+-    }
+-
+-    public function materias()
+-    {
+-        return $this->hasMany(MateriaImpartida::class, 'docente');
+-    }
+ }
+diff --git a/app/Policies/CentroPolicy.php b/app/Policies/CentroPolicy.php
+index d6b6c98..f71fe3e 100644
+--- a/app/Policies/CentroPolicy.php
++++ b/app/Policies/CentroPolicy.php
+@@ -31,7 +31,7 @@ class CentroPolicy
+      */
+     public function viewAny(User $user)
+     {
+-        return $user->id == 1; // un ejemplo de autorización a un usuario concreto.
++        return $user->id == 10; // un ejemplo de autorización a un usuario concreto.
+     }
+ 
+     /**
+diff --git a/app/Policies/NotaPolicy.php b/app/Policies/NotaPolicy.php
+deleted file mode 100644
+index 26affbc..0000000
+--- a/app/Policies/NotaPolicy.php
++++ /dev/null
+@@ -1,101 +0,0 @@
+-<?php
+-
+-namespace App\Policies;
+-
+-use App\Models\Nota;
+-use App\Models\User;
+-use Illuminate\Auth\Access\HandlesAuthorization;
+-
+-class NotaPolicy
+-{
+-    use HandlesAuthorization;
+-
+-    public function before(User $user, $ability)
+-    {
+-        if ($user->esProfesor()) {
+-            return true;
+-        }
+-    }
+-
+-    /**
+-     * Determine whether the user can view any models.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function viewAny(User $user)
+-    {
+-        return true;
+-    }
+-
+-    /**
+-     * Determine whether the user can view the model.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @param  \App\Models\Nota  $nota
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function view(User $user, Nota $nota)
+-    {
+-        return true;
+-    }
+-
+-    /**
+-     * Determine whether the user can create models.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function create(User $user)
+-    {
+-        return false;
+-    }
+-
+-    /**
+-     * Determine whether the user can update the model.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @param  \App\Models\Nota  $nota
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function update(User $user, Nota $nota)
+-    {
+-        return false;
+-    }
+-
+-    /**
+-     * Determine whether the user can delete the model.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @param  \App\Models\Nota  $nota
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function delete(User $user, Nota $nota)
+-    {
+-        return false;
+-    }
+-
+-    /**
+-     * Determine whether the user can restore the model.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @param  \App\Models\Nota  $nota
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function restore(User $user, Nota $nota)
+-    {
+-        return false;
+-    }
+-
+-    /**
+-     * Determine whether the user can permanently delete the model.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @param  \App\Models\Nota  $nota
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function forceDelete(User $user, Nota $nota)
+-    {
+-        return false;
+-    }
+-}
+diff --git a/database/factories/MateriaFactory.php b/database/factories/MateriaFactory.php
+deleted file mode 100644
+index c4c1d80..0000000
+--- a/database/factories/MateriaFactory.php
++++ /dev/null
+@@ -1,20 +0,0 @@
+-<?php
+-
+-namespace Database\Factories;
+-
+-use Illuminate\Database\Eloquent\Factories\Factory;
+-
+-class MateriaFactory extends Factory
+-{
+-    /**
+-     * Define the model's default state.
+-     *
+-     * @return array
+-     */
+-    public function definition()
+-    {
+-        return [
+-            'nombre' => $this->faker->word()
+-        ];
+-    }
+-}
+diff --git a/database/factories/MateriaImpartidaFactory.php b/database/factories/MateriaImpartidaFactory.php
+deleted file mode 100644
+index df0029b..0000000
+--- a/database/factories/MateriaImpartidaFactory.php
++++ /dev/null
+@@ -1,22 +0,0 @@
+-<?php
+-
+-namespace Database\Factories;
+-
+-use Illuminate\Database\Eloquent\Factories\Factory;
+-
+-class MateriaImpartidaFactory extends Factory
+-{
+-    /**
+-     * Define the model's default state.
+-     *
+-     * @return array
+-     */
+-    public function definition()
+-    {
+-        return [
+-            "docente" => $this->faker->numberBetween(1,20),
+-            "grupo" => $this->faker->numberBetween(1,20),
+-            "materia" => $this->faker->numberBetween(1,20)
+-        ];
+-    }
+-}
+diff --git a/database/factories/NotaFactory.php b/database/factories/NotaFactory.php
+deleted file mode 100644
+index 92d2419..0000000
+--- a/database/factories/NotaFactory.php
++++ /dev/null
+@@ -1,23 +0,0 @@
+-<?php
+-
+-namespace Database\Factories;
+-
+-use Illuminate\Database\Eloquent\Factories\Factory;
+-
+-class NotaFactory extends Factory
+-{
+-    /**
+-     * Define the model's default state.
+-     *
+-     * @return array
+-     */
+-    public function definition()
+-    {
+-        return [
+-            "user_id" => $this->faker->numberBetween(1,10),
+-            "materia_id" => $this->faker->numberBetween(1,30),
+-            "evaluacion" => $this->faker->numberBetween(1,3) . "ª",
+-            "nota" => $this->faker->numberBetween(1,10)
+-        ];
+-    }
+-}
+diff --git a/database/migrations/2022_02_16_071835_create_table_notas.php b/database/migrations/2022_02_16_071835_create_table_notas.php
+deleted file mode 100644
+index f02ee5a..0000000
+--- a/database/migrations/2022_02_16_071835_create_table_notas.php
++++ /dev/null
+@@ -1,35 +0,0 @@
+-<?php
+-
+-use Illuminate\Database\Migrations\Migration;
+-use Illuminate\Database\Schema\Blueprint;
+-use Illuminate\Support\Facades\Schema;
+-
+-class CreateTableNotas extends Migration
+-{
+-    /**
+-     * Run the migrations.
+-     *
+-     * @return void
+-     */
+-    public function up()
+-    {
+-        Schema::create('notas', function (Blueprint $table) {
+-            $table->id();
+-            $table->bigInteger("user_id");
+-            $table->bigInteger("materia_id");
+-            $table->string("evaluacion", 5);
+-            $table->smallInteger("nota");
+-            $table->timestamps();
+-        });
+-    }
+-
+-    /**
+-     * Reverse the migrations.
+-     *
+-     * @return void
+-     */
+-    public function down()
+-    {
+-        Schema::dropIfExists('notas');
+-    }
+-}
+diff --git a/database/migrations/2022_02_16_084801_create_materia_impartidas_table.php b/database/migrations/2022_02_16_084801_create_materia_impartidas_table.php
+deleted file mode 100644
+index 53206f5..0000000
+--- a/database/migrations/2022_02_16_084801_create_materia_impartidas_table.php
++++ /dev/null
+@@ -1,34 +0,0 @@
+-<?php
+-
+-use Illuminate\Database\Migrations\Migration;
+-use Illuminate\Database\Schema\Blueprint;
+-use Illuminate\Support\Facades\Schema;
+-
+-class CreateMateriaImpartidasTable extends Migration
+-{
+-    /**
+-     * Run the migrations.
+-     *
+-     * @return void
+-     */
+-    public function up()
+-    {
+-        Schema::create('materia_impartidas', function (Blueprint $table) {
+-            $table->id();
+-            $table->bigInteger("docente");
+-            $table->bigInteger("grupo");
+-            $table->bigInteger("materia");
+-            $table->timestamps();
+-        });
+-    }
+-
+-    /**
+-     * Reverse the migrations.
+-     *
+-     * @return void
+-     */
+-    public function down()
+-    {
+-        Schema::dropIfExists('materia_impartidas');
+-    }
+-}
+diff --git a/database/seeders/DatabaseSeeder.php b/database/seeders/DatabaseSeeder.php
+index 5b2a56b..6f2ee28 100644
+--- a/database/seeders/DatabaseSeeder.php
++++ b/database/seeders/DatabaseSeeder.php
+@@ -2,9 +2,6 @@
+ 
+ namespace Database\Seeders;
+ 
+-use App\Models\Materia;
+-use App\Models\MateriaImpartida;
+-use App\Models\Nota;
+ use Illuminate\Database\Seeder;
+ 
+ class DatabaseSeeder extends Seeder
+@@ -17,8 +14,5 @@ class DatabaseSeeder extends Seeder
+     public function run()
+     {
+         \App\Models\User::factory(10)->create();
+-        Nota::factory(10)->create();
+-        Materia::factory(30)->create();
+-        MateriaImpartida::factory(20)->create();
+     }
+ }
+diff --git a/routes/api.php b/routes/api.php
+index 13a904f..bfb9984 100644
+--- a/routes/api.php
++++ b/routes/api.php
+@@ -17,7 +17,7 @@ use App\Http\Controllers\API\MateriaController;
+ use App\Http\Controllers\API\MatriculaController;
+ use App\Http\Controllers\API\PeriodoLectivoController;
+ use App\Http\Controllers\API\MateriaMatriculadaController;
+-use App\Http\Controllers\API\NotaController;
++
+ use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Route;
+ use Psr\Http\Message\ServerRequestInterface;
+@@ -83,11 +83,7 @@ Route::middleware('auth:sanctum')->
+ 
+ Route::apiResource('tutorizados', TutorizadoController::class);
+ 
+-Route::middleware('auth:sanctum')->
+-    apiResource('notas', NotaController::class);
+ 
+-Route::middleware('auth:sanctum')->
+-    get('notas/media/{materia_id}', [NotaController::class, 'media']);
+ 
+ Route::apiResource('materias', MateriaController::class);
+ 

@@ -73,14 +73,12 @@ class User extends Authenticatable
     {
         //$usuarioProfesor = DB::table('materia_impartida')->where('docente', $this->id);
 
-        $usuarioProfesor = $this->materias();
-        if ($usuarioProfesor != null) {
-            return true;
-        }
-        return false;
+        $usuarioProfesor = $this->materiaImpartida();
+        $cantidadMaterias = $usuarioProfesor->get()->count();
+        return $cantidadMaterias >= 1;
     }
 
-    public function materias()
+    public function materiaImpartida()
     {
         return $this->hasMany(MateriaImpartida::class, 'docente');
     }

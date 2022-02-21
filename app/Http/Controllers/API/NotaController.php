@@ -27,28 +27,6 @@ class NotaController extends Controller
         return NotaResource::collection($notas);
     }
 
-    public function media($materia_id)
-    {
-        $totalNotas = 0;
-        $contadorNotas = 0;
-        $usuarioAutenticado = Auth::user();
-        $notas = $usuarioAutenticado->notas;
-        foreach ($notas as $nota) {
-            $materia = $nota->materia;
-            if ($materia->id == $materia_id) {
-                $totalNotas = $totalNotas + $nota->nota;
-                $contadorNotas++;
-            }
-        }
-        if ($contadorNotas != 0) {
-            $resultado = "La nota media es: " . $totalNotas/$contadorNotas;
-        }else{
-            $resultado = "Nota media de usuario no encontrada";
-        }
-
-        return ($resultado);
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -99,5 +77,31 @@ class NotaController extends Controller
     public function destroy(Nota $nota)
     {
         $nota->delete();
+    }
+
+    public function media($materia_id)
+    {
+        $totalNotas = 0;
+        $contadorNotas = 0;
+
+        $usuarioAutenticado = Auth::user();
+
+        $notas = $usuarioAutenticado->notas;
+
+        foreach ($notas as $nota) {
+            $materia = $nota->materia;
+            if ($materia->id == $materia_id) {
+                $totalNotas = $totalNotas + $nota->nota;
+                $contadorNotas++;
+            }
+        }
+
+        if ($contadorNotas != 0) {
+            $resultado = "La nota media es: " . $totalNotas/$contadorNotas;
+        }else{
+            $resultado = "Nota media de usuario no encontrada";
+        }
+
+        return ($resultado);
     }
 }

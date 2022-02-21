@@ -16,6 +16,8 @@ class Nota extends Model
         "nota"
     ];
 
+    protected $table = "notas";
+
     public function user()
     {
         return $this->belongsTo(User::class);

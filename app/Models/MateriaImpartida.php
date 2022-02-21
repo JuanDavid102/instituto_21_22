@@ -15,6 +15,8 @@ class MateriaImpartida extends Model
         "materia"
     ];
 
+    protected $table = "materia_impartidas";
+
     public function profesor()
     {
         return $this->belongsTo(User::class, "docente");
