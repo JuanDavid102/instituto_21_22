@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\CentroController;
+use App\Http\Controllers\API\CursoController;
 use App\Http\Controllers\API\NivelController;
 
 
@@ -61,10 +62,16 @@ Route::post('tokens/create', function (Request $request) {
 // Route::get('centros/indexOD', [CentroController::class, 'indexOD'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->
+    get('cursos/aulavirtual', [CursoController::class, 'aulavirtual']);
+
+Route::middleware('auth:sanctum')->
     apiResource('centros', CentroController::class)
 ;
 
 Route::apiResource('matriculas', MatriculaController::class);
+
+Route::middleware('auth:sanctum')->
+    apiResource('cursos', CursoController::class);
 
 Route::apiResource('niveles', NivelController::class)
 ->parameters([
@@ -82,8 +89,6 @@ Route::middleware('auth:sanctum')->
     apiResource('grupos', GrupoController::class);
 
 Route::apiResource('tutorizados', TutorizadoController::class);
-
-
 
 Route::apiResource('materias', MateriaController::class);
 
