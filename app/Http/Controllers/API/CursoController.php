@@ -85,11 +85,11 @@ class CursoController extends Controller
         $usuarioActual = Auth::user();
 
         if ($usuarioActual->usuario_av != null) {
-            $response = Http::asForm()->post('https://aulavirtual.murciaeduca.es/webservice/rest/server.php', [
-                'wstoken' => env('WSTOKEN', 'Default Key not provided'),
+            $response = Http::get('https://aulavirtual.murciaeduca.es/webservice/rest/server.php', [
+                'wstoken' => env('WSTOKEN'),
                 'wsfunction' => 'core_enrol_get_users_courses',
                 'moodlewsrestformat' => 'json',
-                'userid' => Auth::user()->alumno_av
+                'userid' => $usuarioActual->usuario_av
             ]);
         }
 
