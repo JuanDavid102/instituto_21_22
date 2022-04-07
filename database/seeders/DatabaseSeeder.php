@@ -2,8 +2,12 @@
 
 namespace Database\Seeders;
 
-use GuzzleHttp\Promise\Create;
+use App\Models\Evento;
+use App\Models\Mapa;
+use App\Models\Marcador;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,8 +18,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
-        \App\Models\Grupo::factory(5)->create();
-        \App\Models\Nivel::factory(5)->create();
+        User::factory(20)->create();
+        Mapa::factory(10)->create();
+        Marcador::factory(10)->create();
+        Evento::factory(10)->create();
     }
 }

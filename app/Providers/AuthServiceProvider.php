@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
+use App\Models\Evento;
+use App\Models\Mapa;
+use App\Models\Marcador;
+use App\Models\User;
+use App\Policies\EventoPolicy;
+use App\Policies\MapaPolicy;
+use App\Policies\MarcadorPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-use App\Policies\CentroPolicy;
-use App\Models\Centro;
-use App\Models\User;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -17,7 +21,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
-        Centro::class => CentroPolicy::class,
+        Evento::class => EventoPolicy::class,
+        Marcador::class => MarcadorPolicy::class,
+        Mapa::class => MapaPolicy::class,
     ];
 
     /**
@@ -28,5 +34,13 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
+
+        Gate::define('getRecordsApi-RecordsApi', function (User $user) {
+            return $user->isAdministrator();
+        });
+
+        Gate::define('userDetail-UserController', function (User $user, $email) {
+            return $user->isOwner($email);
+        });
     }
 }

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Http\Request;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class User extends Authenticatable
 {
@@ -21,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'rol'
     ];
 
     /**
@@ -42,28 +46,34 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function isAdministrator() {
-        return $this->email == env("ADMIN_EMAIL", "pepe@gmail.com");
+    public function isAdministrator()
+    {
+        return $this->rol == "administrador";
     }
 
-    public function isCoordinadorCentro($centro)
+    public function isProfesor()
     {
-        if ($usuarioCordinador = $centro->user) {
-            $usuarioCordinador = $centro->user;
-            return $this->id == $usuarioCordinador->id;
-        }else{
-            return false;
+        return $this->rol == "profesor";
+    }
+
+    public function isAlumno()
+    {
+        return $this->rol == "alumno";
+    }
+
+    public function isOwner($email)
+    {
+        $permiso = $this->isAdministrator();
+
+        if (!$permiso) {
+            $permiso = $this->email == $email;
         }
 
+        return $permiso;
     }
 
-    public function centroCoordinado()
+    public function mapasCreados()
     {
-        return $this->hasOne(Centro::class, 'coordinador');
-    }
-
-    public function grupos()
-    {
-        return $this->belongsToMany(Grupo::class, 'matriculas', 'alumno', 'grupo');
+        return $this->hasMany(Mapa::class, 'usuario_id');
     }
 }
